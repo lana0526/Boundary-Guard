@@ -65,7 +65,7 @@ const App: React.FC = () => {
               className="flex items-center space-x-1 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition-colors"
             >
               <Globe size={16} />
-              <span>{language === 'en' ? 'English' : '中文'}</span>
+              <span>{language === 'en' ? '中文' : 'English'}</span>
             </button>
           </div>
         </div>
