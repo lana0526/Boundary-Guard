@@ -1,8 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
-import { AnalysisResult, Perspective } from "../types";
+import { AnalysisResult, Perspective, Language } from "../types";
 import { SYSTEM_INSTRUCTION, ANALYSIS_SCHEMA } from "../constants";
 
-export const analyzeText = async (text: string, perspective: Perspective): Promise<AnalysisResult> => {
+export const analyzeText = async (text: string, perspective: Perspective, language: Language): Promise<AnalysisResult> => {
   if (!process.env.API_KEY) {
     throw new Error("API Key is missing. Please check your environment variables.");
   }
@@ -16,7 +16,7 @@ export const analyzeText = async (text: string, perspective: Perspective): Promi
         systemInstruction: SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
         responseSchema: ANALYSIS_SCHEMA,
-        temperature: 0.3, // Lower temperature for more consistent analysis
+        temperature: 0.3, 
       },
       contents: [
         {
@@ -25,7 +25,8 @@ export const analyzeText = async (text: string, perspective: Perspective): Promi
             {
               text: JSON.stringify({
                 user_text: text,
-                perspective: perspective
+                perspective: perspective,
+                response_language: language
               })
             }
           ]

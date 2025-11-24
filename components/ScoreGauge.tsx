@@ -1,11 +1,16 @@
 import React from 'react';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
+import { Language } from '../types';
+import { TRANSLATIONS } from '../constants';
 
 interface ScoreGaugeProps {
   score: number;
+  language: Language;
 }
 
-const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score }) => {
+const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, language }) => {
+  const t = TRANSLATIONS[language];
+
   const getColor = (s: number) => {
     if (s <= 20) return '#22c55e'; // Green-500
     if (s <= 40) return '#eab308'; // Yellow-500
@@ -18,10 +23,10 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score }) => {
   const data = [{ name: 'Score', value: score, fill: color }];
 
   const getLabel = (s: number) => {
-    if (s <= 20) return 'Healthy';
-    if (s <= 40) return 'Mild Risk';
-    if (s <= 70) return 'Moderate Risk';
-    return 'High Risk';
+    if (s <= 20) return t.score_healthy;
+    if (s <= 40) return t.score_mild;
+    if (s <= 70) return t.score_moderate;
+    return t.score_high;
   };
 
   return (

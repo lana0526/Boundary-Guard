@@ -1,12 +1,16 @@
 import React from 'react';
-import { EvidenceSpan } from '../types';
+import { EvidenceSpan, Language } from '../types';
 import { AlertTriangle } from 'lucide-react';
+import { MANIPULATION_LABELS } from '../constants';
 
 interface EvidenceHighlightProps {
   evidence: EvidenceSpan;
+  language: Language;
 }
 
-const EvidenceHighlight: React.FC<EvidenceHighlightProps> = ({ evidence }) => {
+const EvidenceHighlight: React.FC<EvidenceHighlightProps> = ({ evidence, language }) => {
+  const labels = MANIPULATION_LABELS[language];
+
   return (
     <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-md mb-3">
       <div className="flex items-start">
@@ -18,7 +22,7 @@ const EvidenceHighlight: React.FC<EvidenceHighlightProps> = ({ evidence }) => {
           <div className="flex flex-wrap gap-2 mb-2">
             {evidence.manipulation_types.map((type, i) => (
               <span key={i} className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-                {type.replace(/_/g, ' ')}
+                {labels[type] || type.replace(/_/g, ' ')}
               </span>
             ))}
           </div>

@@ -1,4 +1,5 @@
 export type Perspective = 'received' | 'spoken_by_user';
+export type Language = 'en' | 'zh';
 
 export interface EvidenceSpan {
   text: string;

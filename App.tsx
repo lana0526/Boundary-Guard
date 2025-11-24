@@ -1,30 +1,34 @@
 import React, { useState } from 'react';
-import { AnalysisResult, AnalysisState, Perspective } from './types';
+import { AnalysisResult, AnalysisState, Perspective, Language } from './types';
 import { analyzeText } from './services/geminiService';
 import AnalysisDashboard from './components/AnalysisDashboard';
-import { Shield, MessageSquare, User, Send, Loader2, Info } from 'lucide-react';
+import { Shield, MessageSquare, User, Send, Loader2, Globe } from 'lucide-react';
 import clsx from 'clsx';
+import { TRANSLATIONS } from './constants';
 
 const App: React.FC = () => {
   const [text, setText] = useState('');
   const [perspective, setPerspective] = useState<Perspective>('received');
+  const [language, setLanguage] = useState<Language>('en');
   const [analysisState, setAnalysisState] = useState<AnalysisState>({
     isLoading: false,
     error: null,
     result: null,
   });
 
+  const t = TRANSLATIONS[language];
+
   const handleAnalyze = async () => {
     if (!text.trim()) return;
 
     setAnalysisState({ isLoading: true, error: null, result: null });
     try {
-      const result = await analyzeText(text, perspective);
+      const result = await analyzeText(text, perspective, language);
       setAnalysisState({ isLoading: false, error: null, result });
     } catch (error) {
       setAnalysisState({
         isLoading: false,
-        error: "An error occurred while analyzing the text. Please try again.",
+        error: t.error_generic,
         result: null
       });
     }
@@ -33,6 +37,10 @@ const App: React.FC = () => {
   const handleClear = () => {
     setText('');
     setAnalysisState({ isLoading: false, error: null, result: null });
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'zh' : 'en');
   };
 
   return (
@@ -45,13 +53,20 @@ const App: React.FC = () => {
               <Shield size={24} />
             </div>
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-600">
-              Boundary Guard
+              {t.app_name}
             </span>
           </div>
-          <div className="hidden sm:flex items-center space-x-4 text-sm text-slate-500">
-            <span className="flex items-center"><Shield size={14} className="mr-1" /> Safe</span>
-            <span className="flex items-center"><User size={14} className="mr-1" /> Private</span>
-            <span className="flex items-center"><Info size={14} className="mr-1" /> AI-Powered</span>
+          <div className="flex items-center space-x-4">
+            <div className="hidden sm:flex items-center space-x-4 text-sm text-slate-500 mr-2">
+              <span className="hidden md:inline">{t.tagline}</span>
+            </div>
+            <button 
+              onClick={toggleLanguage}
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition-colors"
+            >
+              <Globe size={16} />
+              <span>{language === 'en' ? 'English' : '中文'}</span>
+            </button>
           </div>
         </div>
       </header>
@@ -60,10 +75,10 @@ const App: React.FC = () => {
         
         {/* Intro / Empty State */}
         {!analysisState.result && !analysisState.isLoading && (
-          <div className="text-center mb-10 max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold text-slate-800 mb-3">Check Your Conversations</h1>
+          <div className="text-center mb-10 max-w-2xl mx-auto animate-fade-in">
+            <h1 className="text-3xl font-bold text-slate-800 mb-3">{t.title}</h1>
             <p className="text-slate-600 text-lg">
-              Detect manipulative patterns, guilt-tripping, or gaslighting in messages you receive or send. Get objective, psychological insights instantly.
+              {t.subtitle}
             </p>
           </div>
         )}
@@ -81,7 +96,7 @@ const App: React.FC = () => {
               )}
             >
               <MessageSquare className="w-4 h-4 mr-2" />
-              I Received This
+              {t.tab_received}
             </button>
             <button
               onClick={() => setPerspective('spoken_by_user')}
@@ -93,7 +108,7 @@ const App: React.FC = () => {
               )}
             >
               <User className="w-4 h-4 mr-2" />
-              I Said This
+              {t.tab_spoken}
             </button>
           </div>
           
@@ -102,8 +117,8 @@ const App: React.FC = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={perspective === 'received' 
-                ? "Paste the message you received here... (e.g., 'If you really loved me, you wouldn't go out with your friends.')" 
-                : "Type what you want to say here... (e.g., 'You always make me angry, it's your fault.')"
+                ? t.placeholder_received
+                : t.placeholder_spoken
               }
               className="w-full min-h-[150px] p-4 text-lg text-slate-800 placeholder:text-slate-400 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all resize-y outline-none"
             />
@@ -114,7 +129,7 @@ const App: React.FC = () => {
                 className="text-sm text-slate-400 hover:text-slate-600 font-medium px-3 py-1"
                 disabled={!text}
               >
-                Clear
+                {t.clear}
               </button>
               <button
                 onClick={handleAnalyze}
@@ -129,11 +144,11 @@ const App: React.FC = () => {
                 {analysisState.isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Analyzing...
+                    {t.analyzing}
                   </>
                 ) : (
                   <>
-                    Analyze Message
+                    {t.analyze}
                     <Send className="w-4 h-4 ml-2" />
                   </>
                 )}
@@ -153,13 +168,17 @@ const App: React.FC = () => {
         {/* Results Section */}
         {analysisState.result && (
           <div className="scroll-mt-20" id="results">
-             <AnalysisDashboard result={analysisState.result} perspective={perspective} />
+             <AnalysisDashboard 
+                result={analysisState.result} 
+                perspective={perspective} 
+                language={language}
+              />
           </div>
         )}
       </main>
       
       <footer className="text-center text-slate-400 py-8 text-sm">
-        <p>© {new Date().getFullYear()} Boundary Guard. Not a substitute for professional therapy or legal advice.</p>
+        <p>© {new Date().getFullYear()} {t.footer}</p>
       </footer>
     </div>
   );
